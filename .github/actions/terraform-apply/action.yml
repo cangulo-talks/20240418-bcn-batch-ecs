@@ -1,0 +1,49 @@
+name: "terraform-plan"
+inputs:
+  terraform-folder:
+    description: "folder containing terraform file (*.tf)"
+    required: true
+  terraform-plan-file:
+    description: "file where terraform will put the proposed plan"
+    required: true
+  terraform-outputs-file:
+    description: "File where terraform will print the configuration outputs"
+    required: false
+  backend-config:
+    description: "backend fiel containing \"key\" = \"TF_STATE_PATH\" "
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: change to terraform folder
+      shell: bash
+      id: tf-params
+      run: |
+        working_folder=$(pwd)
+        BACKEND_CONFIG_FILE="$working_folder/${{ inputs.backend-config }}"
+        TFPLAN_OUTPUT="$working_folder/${{ inputs.terraform-plan-file }}"
+        TF_OUTPUTS="$working_folder/${{ inputs.terraform-outputs-file }}"
+
+        echo "backend_config_file=$(echo $BACKEND_CONFIG_FILE)"  >> $GITHUB_OUTPUT
+        echo "tfplan_output=$(echo $TFPLAN_OUTPUT)"              >> $GITHUB_OUTPUT
+        echo "tf_outputs=$(echo $TF_OUTPUTS)"                    >> $GITHUB_OUTPUT
+
+    - name: terraform init
+      shell: bash
+      run: |
+        terraform -chdir="${{ inputs.terraform-folder}}" init                   \
+          -backend-config="${{ steps.tf-params.outputs.backend_config_file }}" 
+
+    - name: terraform apply
+      shell: bash
+      run: |
+        terraform -chdir="${{ inputs.terraform-folder}}" apply \
+          "${{ steps.tf-params.outputs.tfplan_output }}"
+
+    - name: terraform outputs
+      shell: bash
+      run: |
+        terraform -chdir="${{ inputs.terraform-folder}}" output \
+          -json >> "${{ steps.tf-params.outputs.tf_outputs }}"
+

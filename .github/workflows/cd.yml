@@ -1,0 +1,19 @@
+name: 🚀 continuous-delivery
+
+on:
+  push:
+    branches:
+      - main
+
+concurrency:
+  cancel-in-progress: false
+  group: "cd-main"
+
+jobs:
+  tfm-apply:
+    name: 📃 TF Apply All workspaces
+    uses: ./.github/workflows/shared-tf-apply.yml
+    with:
+      workspaces: "['dev/main']"
+      apply: true
+    secrets: inherit
