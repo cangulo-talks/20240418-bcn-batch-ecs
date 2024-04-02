@@ -1,17 +1,17 @@
 name: get changes
 
 on:
-    workflow_call: 
+  workflow_call:
 
 jobs:
   get-changes:
     name: 📑List changes
     runs-on: ubuntu-latest
     steps:
-    - name: Paths Changes Filter
-      uses: dorny/paths-filter@v2.11.1
-      with:
-        filters: |
+      - name: Paths Changes Filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
             configuration:
                 - added|modified: 'configuration/**'
             terraform:

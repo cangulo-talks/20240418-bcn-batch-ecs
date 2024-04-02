@@ -1,0 +1,9 @@
+[
+  {
+    "DetailType": "transaction",
+    "Source": "custom.myApp",
+    "Detail": {
+      "location": "EUR-"
+    }
+  }
+]

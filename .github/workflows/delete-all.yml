@@ -1,0 +1,18 @@
+name: 💣️🧹 destroy all
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  cancel-in-progress: false
+  group: "cd-main"
+
+jobs:
+  tfm-apply:
+    name: 📃 TF Apply All workspaces
+    uses: ./.github/workflows/shared-tf-apply.yml
+    with:
+      workspaces: "['dev/main']"
+      apply: true
+      destroy-mode: true
+    secrets: inherit
