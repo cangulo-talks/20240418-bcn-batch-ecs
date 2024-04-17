@@ -9,6 +9,6 @@ jobs:
     name: 📃 Plan All workspaces
     uses: ./.github/workflows/shared-tf-apply.yml
     with:
-      workspaces: "['tst/arepabank', 'tst/tacobank', 'acc/arepabank', 'acc/tacobank', 'prd/arepabank', 'prd/tacobank']"
+      workspaces: "['dev/main']"
       apply: false
     secrets: inherit
