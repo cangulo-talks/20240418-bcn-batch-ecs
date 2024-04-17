@@ -14,18 +14,3 @@
   * [EB schedule + ECR](https://serverlessland.com/patterns/eventbridge-schedule-ecs-terraform)
 <!-- * [EB + SQS + ECR](https://serverlessland.com/patterns/eventbridge-sqs-ecs-cdk) -->
 
-Functionless batch processing with EB?
-
-Example?
-
-## speech
-
-1. Trigger ECS task from a lambda
-   1. advantage, validate input in the lambda
-2. Trigger ECS task directly from EB
-
-Batch?
-
-### others
-   1. Validate input using EB / EB pipes?
-   2. 
