@@ -17,8 +17,6 @@ _class: invert
 3. **What we did**
 4. **What we learnt**
 
-<!-- TODO: check all with grammarly -->
-
 ![bg opacity:25%](https://secure.meetupstatic.com/photos/event/c/1/9/4/600_478429556.jpeg)
 
 ---
@@ -28,7 +26,7 @@ _class: invert
 
 - I am Carlos Angulo
 - I work at [Ohpen](https://www.ohpen.com) as a Platform Engineer
-- I have more than 7 years of experience
+- I have more than 8 years of experience
 - You can find me on [LinkedIn](www.linkedin.com/in/angulomascarell) or [GitHub](https://github.com/cangulo)
 
 ![bg right:30% w:60% vertical](assets/imgs/profile_medium.png)
@@ -40,18 +38,32 @@ _class: invert
 
 We have a legacy monolith app running in EC2 + RDS
 
-<!-- TODO: Diagram with legacy AWS account with the EC2 and DB-->
+<!-- 
+Comment: 
+  - We had multiple services that perform batch jobs as daily reports generation
+  - Those services are are executed once a day in a EC2 instance
+-->
+
 ![bg contain right:40% w:80% ](assets/imgs/1-legacy-account.excalidraw.png)
 
 ---
 
 # **Dockerization**
 
-We dockerize some batch apps in a new account
+We dockerized some batch apps in a new account
 
 _How would you trigger those apps from the monolith?🤔_
 
-<!-- TODO: Diagram with two AWS accounts with a line connecting them including a question mark in the middle-->
+<!-- 
+Comment:
+  - We migrated those projects to docker containers and deploy them in a new AWS account
+  - The only step left is how to trigger the modernized apps?
+    * Trigger the ECS task directly from the EC2 by assuming a role with the permissions required
+      - This couples both solutions
+    * Make the monolith post a message to a SNS topic which will trigger the lambda
+      - This is a better because it decouples but requires cross-account access for the SNS topic
+-->
+
 ![bg right:45% w:100% ](assets/imgs/2-dockerization.excalidraw.png)
 
 ---
@@ -60,7 +72,8 @@ _How would you trigger those apps from the monolith?🤔_
 
 We decide to trigger batches based on events
 
-<!-- Comment: 
+<!-- 
+Comment: 
   - We create the batch runner lambda reusing monolith code
   - lambda triggers different task based on the event type
   - It was the solution with less changes for developers
@@ -71,10 +84,11 @@ We decide to trigger batches based on events
 
 ---
 
-<!-- Comment: 
+<!-- 
+Comment: 
   - DotNet, so developer friendly
-  - Here we first get the ecsConfig, so the configuration for the Task execution
-  - Please note there is some NWK configuration as VPC, SG, subnets
+  - Command Parameters and Environment Variables, 
+  - ContainerOverrides, we can customize the execution based on the event 
 -->
 
 ![bg height:80% ](assets/imgs/6-runbatch-code.png)
@@ -95,11 +109,17 @@ We decide to trigger batches based on events
 
 <!-- Comment: 
   - Permissions
-  - DotNet, so developer friendly
-  - ContainerOverrides, we can customize the execution based on the event 
 -->
 
+---
+
 ![bg h:80% vertical](assets/imgs/8-runbatch-permissions.png)
+
+<!-- 
+Comment: 
+  - Permissions: pass role and run task
+  - arn with a wildcard to limit the scope to our bath apps
+-->
 
 ---
 
@@ -107,12 +127,14 @@ We decide to trigger batches based on events
 
 What about duplicated events?
 
-<!-- Comment: 
-  - How do you avoid duplicate executions? This is a idempotency problem
-  - One option is to use a Dynamo DB to store and idempotency key for each execution
--->
-
 ![bg right:50% w:80% vertical](assets/imgs/duplicated-events.jpg)
+
+<!-- 
+Comment: 
+  - EB ensures that at least one delivery succeeds but duplicated events can come
+  - How would you handled them? Please note this is a idempotency problem, for the same input we want to return 
+    * One option is to use a Dynamo DB to store and idempotency key for each execution
+-->
 
 ---
 
@@ -120,9 +142,11 @@ What about duplicated events?
 
 <!-- store an idempotency key in a DynamoDB -->
 
-<!-- Comment: 
+<!-- 
+Comment: 
   - Each event we receive will be hashed into an idempotency key
-  - The lambda will ensure before each execution, the event is unique
+      * if the event is not registered, we proceed to execute the ECS task
+      * if we receive an event that is already registered in the DB, we ignore it because we don't want to execute it to save costs
 -->
 
 ![bg right:65% w:100% vertical](assets/imgs/4-idemptency-dynamo.excalidraw.png)
@@ -132,9 +156,16 @@ What about duplicated events?
 **Idempotency** with SQS
 
 <!-- 
-  comment:s
+Comment:
   - No code change needed!☁️
-  - We solve this using SQS instead of code + DB. 💸 
+  - We solve this using SQS instead of code + DB. 💸
+  - We have a idempotency Windows of 5m which is enough because we have an orchestrator that trigger the batches once per day
+
+Ref: Slide 55
+https://d1.awsstatic.com/events/Summits/reinvent2022/API307-R_Designing-event-driven-integrations-using-Amazon-EventBridge.pdf
+S3:
+https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/using-messagededuplicationid-property.html
+
 -->
 
 ![bg right:65% w:100% vertical](assets/imgs/5-idemptency-sqs.excalidraw.png)
@@ -160,10 +191,14 @@ What about duplicated events?
 
 <!-- 
 Comments:
-Event Bridge and service integration
-Are they worth it for us?
-- More costly since Fargate charges you 1 minute per execution.
-- We would be required to implement idempotency at the batch level
+- Lambda + SQS 
+  - offers more control because there is a single point to validate input and trigger the batches
+  - Single Point of Failure
+  - Cheaper because we don't get to execute apps if the input is invalid
+- Event Bridge and service integration
+  - Simpler, no need of lambda and SQS but need a DynamoDB
+  - However, each app must implement idempotency and use the DynamoDB
+  - Apps will always be executed making the solution more expensive since Fargate charges you 1 minute per execution.
 - Pretty much the same amount of code, just in a different place. 
 -->
 
