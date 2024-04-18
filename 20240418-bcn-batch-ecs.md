@@ -107,12 +107,6 @@ Comment:
 
 ---
 
-<!-- Comment: 
-  - Permissions
--->
-
----
-
 ![bg h:80% vertical](assets/imgs/8-runbatch-permissions.png)
 
 <!-- 
