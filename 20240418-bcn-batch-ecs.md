@@ -71,16 +71,25 @@ We decide to trigger batches based on events
 
 ---
 
-<!-- # **lambda** -->
-
-
 <!-- Comment: 
   - DotNet, so developer friendly
-  - Command Parameters and Environment Variables, 
-  - ContainerOverrides, we can customize the execution based on the event 
+  - Here we first get the ecsConfig, so the configuration for the Task execution
+  - Please note there is some NWK configuration as VPC, SG, subnets
 -->
 
 ![bg height:80% ](assets/imgs/6-runbatch-code.png)
+
+---
+
+<!-- Comment: 
+  - Here we get the ECS config for the btach provided in the event
+  - Please note
+    - We get the batchInfo filter by the BatchTypeId 
+    - We provide a TraceId as EV for monitoring
+    - We provide the event parameters (parameters for bussiness) as EV
+-->
+
+![bg height:80% ](assets/imgs/7-runbatch-code-get-config.png)
 
 ---
 
@@ -90,7 +99,7 @@ We decide to trigger batches based on events
   - ContainerOverrides, we can customize the execution based on the event 
 -->
 
-![bg h:80% vertical](assets/imgs/7-runbatch-permissions.png)
+![bg h:80% vertical](assets/imgs/8-runbatch-permissions.png)
 
 ---
 
