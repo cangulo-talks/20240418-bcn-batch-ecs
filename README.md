@@ -3,7 +3,7 @@
 
 * Talk: Functionless Batch Processing with Event Bridge
 * Event: [Serverless Barcelona Meetup & AWS User Group](https://www.meetup.com/serverless-barcelona/events/299888144/)
-* Meetup Group: [Serverless Barcelona](https://www.meetup.com/serverless-barcelona/events/)
+* Meetup Group: [Serverless Barcelona](https://www.meetup.com/serverless-barcelona/)
 * Date: 20240418
 * Host: [Ohpen](https://ohpen.com)
 * 📺️ slides created using MARP and vs code:
